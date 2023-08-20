@@ -90,6 +90,19 @@ Paste, enter your password instead of __<password>__, enter the port number, and
 
 
 ## Example
+#### Products
+![example_products](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/products_example.gif?raw=true)
+
+#### Users
+![example_users](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/users_example.gif?raw=true)
+
+#### Orders
+![example_orders](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/order_example.gif?raw=true)
+
+#### Oders - Filter
+![example_filter](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/filter_example.gif?raw=true)
+
+
 
 ## Badges
 
