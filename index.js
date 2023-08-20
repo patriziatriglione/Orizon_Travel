@@ -13,9 +13,9 @@ app.use(express.urlencoded({ extended: true }));
 const port = process.env.PORT || 3000;
 // to use json method
 app.use(express.json())
-app.use("/products", productRoutes)
-app.use("/users", userRoutes)
-app.use("/orders", orderRoutes)
+app.use("/api/products", productRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/orders", orderRoutes)
 //connect to mongoose
 mongoose.connect(process.env.CONNECT_DB, {
     useNewUrlParser: true,
