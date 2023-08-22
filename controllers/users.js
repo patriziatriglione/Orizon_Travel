@@ -1,15 +1,34 @@
 const  mongoose = require("mongoose");
-const User = require ("../models/user")
 const httpStatus = require ("http-status-codes")
 const validator = require('validator');
+const {
+    getUserByIdDB,
+    getAllUsersDB,
+    insertUserDB,
+    deleteUserDB,
+    updateUserDB,
+    countDocuUserDB
+} = require("../models/userModel")
 // read all users 
 const getAllUsers = async (req, res) => {
    try {
-        const users = await User.find()
-        res.status(httpStatus.OK).json({
-            success: true,
-            data: users
-        })
+    // page number
+    const page = parseInt(req.query.page) || 1;
+    //number of users per page
+    const perPage = parseInt(req.query.perPage) || 10;
+    // calculate total number of documents and how many pages are needed to include documents based on "perPage"
+    const totalUsers = await countDocuUserDB();
+    const totalPages = Math.ceil(totalUsers / perPage)
+    const users = await getAllUsersDB(page, perPage)
+    res.status(httpStatus.OK).json({
+        success: true,
+        data: users,
+        pageInfo: {
+            currentPage: page,
+            totalPages: totalPages,
+            totalUsers: totalUsers
+        }
+    });
     } catch(error) {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             success: false,
@@ -21,7 +40,7 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     const {id = _id} = req.params;
     try {
-        const user = await User.findById(id)
+        const user = await getUserByIdDB(id)
         res.status(httpStatus.OK).json({
             success: true,
             data: user
@@ -35,16 +54,15 @@ const getUserById = async (req, res) => {
 }
 // add new User
 const insertUser = async (req, res) => {
-    const user = new User (req.body)
-    if (!validator.isEmail(user.email)) {
+    try {
+        const user = await insertUserDB(req.body); 
+        if (!validator.isEmail(user.email)) {
         return res.status(httpStatus.BAD_REQUEST).json({
             success: false,
             message: "invalid email format"
         });
     }
-    try {
-        await user.save()
-        res.status(httpStatus.CREATED).json({
+    res.status(httpStatus.CREATED).json({
             success: true,
             data: user
         })
@@ -65,7 +83,7 @@ const deleteUser = async ( req, res) => {
         })
     }
     try {
-        await User.findByIdAndDelete(id)
+        await deleteUserDB(id)
         res.status(httpStatus.OK).json({
             success: true,
             message: `user with id ${id} successfully deleted`
@@ -94,7 +112,7 @@ const updateUser = async (req, res) => {
         })
     }
     try {
-        const user = await User.findByIdAndUpdate(id, data, {new:true})
+        const user = await updateUserDB(id, data)
         res.status(httpStatus.OK).json({
             success: true,
             message: `user with id ${id} changed successfully`,

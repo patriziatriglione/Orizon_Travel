@@ -1,13 +1,25 @@
 const mongoose= require("mongoose");
-const Order = require("../models/order");
-const Product = require("../models/product");
-const User = require("../models/user");
 const httpStatus = require ("http-status-codes");
+const {getProductByIdDB} = require("../models/productModel")
+const {getUserByIdDB} = require("../models/userModel")
+const {
+    getAllOrderDB, 
+    getOrderByIdDB,
+    insertOrderDB,
+    deleteOrderDB,
+    updateOrderDB,
+    countDocuOrderDB
+} = require ("../models/orderModel")
 // read all orders
 const getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
-        .populate("products users")
+        const page = parseInt(req.query.page) || 1;
+        // number of orders per page
+        const perPage = parseInt(req.query.perPage) || 10;
+        // calculate total number of documents and how many pages are needed to include documents based on "perPage"
+        const totalOrders = await countDocuOrderDB();
+        const totalPages = Math.ceil(totalOrders / perPage)
+        const orders = await getAllOrderDB(page, perPage)
         if (!orders.length) {
             return res.status(httpStatus.NOT_FOUND).json({
                 success: false,
@@ -16,7 +28,13 @@ const getAllOrders = async (req, res) => {
          }
          res.status(httpStatus.OK).json({
              success: true,
-             data: orders
+             data: orders,
+             pageInfo: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalOrders: totalOrders
+             }
+
          })
      } catch(error) {
          res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -29,8 +47,7 @@ const getAllOrders = async (req, res) => {
  const getOrderById = async (req, res) => {
     const {id = _id} = req.params;
     try {
-        const order = await Order.findById(id)
-        .populate("products users")
+        const order = await getOrderByIdDB(id)
         res.status(httpStatus.OK).json({
             success: true,
             data: order
@@ -42,31 +59,30 @@ const getAllOrders = async (req, res) => {
         })
     }
 }
- // creare new Order
+ // create new Order
  const insertOrder = async ( req, res) => {
     const {products, users} = req.body;
     try {
-        const validProducts = await Product.find({
-            _id: {$in: products}
-        });
-        const validUsers = await User.find({
-            _id: {$in:users}
-        });
+        const validProducts = await getProductByIdDB(products);
+        const validUsers = await getUserByIdDB(users);
+        console.log("Valid Products:", validProducts);
+        console.log("Valid Users:", validUsers);
+console.log("Valid Products Length:", validProducts.length);
+        console.log("Valid Users Length:", validUsers.length);
         if (!validProducts.length || !validUsers.length) {
             return res.status(httpStatus.BAD_REQUEST).json({
                 success: false,
                 message: "Invalid products or users"
             });
         }
-        const order = new Order({
+        const order = {
             products: validProducts.map(product => product._id),
             users: validUsers.map(user => user._id)
-        });
-        await order.populate("products users")
-        await order.save()
+        };
+        const insertOrder = await insertOrderDB(order);
         res.status(httpStatus.CREATED).json({
             success: true,
-            data: order
+            data: insertOrder
         });
     } catch(error) {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -85,7 +101,7 @@ const getAllOrders = async (req, res) => {
         })
     }
     try {
-        await Order.findByIdAndDelete(id)
+        await deleteOrderDB(id);
         res.status(httpStatus.OK).json({
             success: true,
             message: `order with id ${id} successfully deleted`
@@ -108,8 +124,7 @@ const updateOrder = async (req, res) => {
         })
     }
     try {
-        const order = await Order.findByIdAndUpdate(id, data, {new:true})
-        .populate("products users");
+        const order = await updateOrderDB(id, data)
         res.status(httpStatus.OK).json({
             success: true,
             message: `order with id ${id} changed successfully`,

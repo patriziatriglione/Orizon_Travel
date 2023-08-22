@@ -1,14 +1,34 @@
 const mongoose = require("mongoose");
-const Product = require("../models/product");
-const httpStatus = require ("http-status-codes")
+const httpStatus = require ("http-status-codes");
+const {
+    getAllProductDB,
+    getProductByIdDB,
+    inserProductDB,
+    deleteProductDB,
+    updateProductDB,
+    countDocuProductDB
+} = require("../models/productModel");
 // read all products 
 const getAllProducts = async (req, res) => {
    try {
-        const products = await Product.find()
+    // page number
+    const page = parseInt(req.query.page) || 1;
+    // number of products per page
+    const perPage = parseInt(req.query.perPage) || 10;
+    // calculate total number of documents and how many pages are needed to include documents based on "perPage"
+    const totalProducts = await countDocuProductDB();
+    const totalPages = Math.ceil(totalProducts / perPage)
+    const products = await getAllProductDB(page,perPage)
+    
         res.status(httpStatus.OK).json({
             success: true,
-            data: products
-        })
+            data: products,
+            pageInfo: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalProducts: totalProducts
+            }
+        });
     } catch(error) {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             success: false,
@@ -20,7 +40,7 @@ const getAllProducts = async (req, res) => {
 const getProductById = async (req, res) => {
     const {id = _id} = req.params;
     try {
-        const product = await Product.findById(id)
+        const product = await getProductByIdDB(id)
         res.status(httpStatus.OK).json({
             success: true,
             data: product
@@ -34,9 +54,8 @@ const getProductById = async (req, res) => {
 }
 // add new Product
 const insertProduct = async (req, res) => {
-    const product = new Product (req.body)
     try {
-        await product.save()
+        const product = await inserProductDB(req.body);
         res.status(httpStatus.CREATED).json({
             success: true,
             data: product
@@ -58,7 +77,7 @@ const deleteProduct = async ( req, res) => {
         })
     }
     try {
-        await Product.findByIdAndDelete(id)
+        await deleteProductDB(id)
         res.status(httpStatus.OK).json({
             success: true,
             message: `product with id ${id} successfully deleted`
@@ -81,7 +100,7 @@ const updateProduct = async (req, res) => {
         })
     }
     try {
-        const product = await Product.findByIdAndUpdate(id, data, {new:true})
+        const product = await updateProductDB(id, data)
         res.status(httpStatus.OK).json({
             success: true,
             message: `product with id ${id} changed successfully`,

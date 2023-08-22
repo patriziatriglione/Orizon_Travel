@@ -9,13 +9,10 @@ dotenv.config();
 // function for express
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-// PORT
-const port = process.env.PORT || 3000;
 // to use json method
 app.use(express.json())
-app.use("/api/products", productRoutes)
-app.use("/api/users", userRoutes)
-app.use("/api/orders", orderRoutes)
+// PORT
+const port = process.env.PORT || 3000;
 //connect to mongoose
 mongoose.connect(process.env.CONNECT_DB, {
     useNewUrlParser: true,
@@ -27,6 +24,9 @@ mongoose.connection.on("error", err => {
 mongoose.connection.on("connected", res => {
     console.log("connected")
 })
+app.use("/api/products", productRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/orders", orderRoutes)
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
 })

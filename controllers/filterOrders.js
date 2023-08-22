@@ -1,7 +1,8 @@
-const mongoose= require("mongoose");
-const Order = require("../models/order");
-const Product = require("../models/product");
-const User = require("../models/user")
+const {
+  ordersDB,
+  countDocumentsDB
+} = require("../models/orderModel")
+const {productFindDB} = require("../models/productModel")
 const httpStatus = require ("http-status-codes");
 // filter by date and products
 const filterByDateAndProduct = async (req,res) => {
@@ -12,8 +13,6 @@ if (orderDate) {
   nextDay = new Date(orderDate);
   nextDay.setDate(orderDate.getDate() + 1);
 }
-// limits results
-const limit = req.query.limit ? parseInt(req.query.limit) : null;
 // results in ascending, descending or by date modified
 const sortOrder = req.query.sort === "asc" ? 1 : -1
 const sortField = req.query.sortField || "createdAt";
@@ -24,7 +23,7 @@ try {
     let product = null;
     // if the product is not there, a warning message appears
     if(productName) {
-         product = await Product.findOne({ name: productName});
+         product = await productFindDB({name:productName});
     if (!product) {
         return res.status(httpStatus.NOT_FOUND).json({
             success: false,
@@ -43,10 +42,14 @@ if (orderDate) {
         $lt: nextDay,  
     };
 }
-const orders = await Order.find(orderQuery)
-    .populate("products users")
-    .limit(limit)
-    .sort(sortOption)
+// page number
+const page = parseInt(req.query.page) || 1;
+//number of orders per page
+const perPage = parseInt(req.query.perPage) || 10;
+// calculate total number of documents and how many pages are needed to include documents based on "perPage"
+const totalOrders = await countDocumentsDB(orderQuery);
+const totalPages = Math.ceil(totalOrders / perPage)
+const orders = await ordersDB(orderQuery, page, perPage, sortOption)
     if (orders.length === 0) {
         return res.status(httpStatus.NOT_FOUND).json({
           success: false,
@@ -55,7 +58,12 @@ const orders = await Order.find(orderQuery)
       }
       res.status(httpStatus.OK).json({
         success: true,
-        orders: orders
+        orders: orders,
+        pageInfo: {
+          currentPage: page,
+          totalPages: totalPages,
+          totalOrders: totalOrders
+      }
     })
   } catch(errror) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
