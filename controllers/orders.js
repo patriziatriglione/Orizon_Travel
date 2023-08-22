@@ -65,10 +65,6 @@ const getAllOrders = async (req, res) => {
     try {
         const validProducts = await getProductByIdDB(products);
         const validUsers = await getUserByIdDB(users);
-        console.log("Valid Products:", validProducts);
-        console.log("Valid Users:", validUsers);
-console.log("Valid Products Length:", validProducts.length);
-        console.log("Valid Users Length:", validUsers.length);
         if (!validProducts.length || !validUsers.length) {
             return res.status(httpStatus.BAD_REQUEST).json({
                 success: false,
