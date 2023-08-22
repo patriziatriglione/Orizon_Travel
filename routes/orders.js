@@ -6,10 +6,8 @@ const {
     deleteOrder,
     updateOrder
 } = require("../controllers/orders");
-const {filterByDateAndProduct} = require("../controllers/filterOrders")
 // Router Orders
 const router = express.Router();
-router.get("/", filterByDateAndProduct);
 router.get("/", getAllOrders);
 router.post("/", insertOrder);
 router.delete("/:id", deleteOrder);

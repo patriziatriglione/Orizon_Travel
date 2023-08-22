@@ -1,11 +1,4 @@
 const Order = require ("./order")
-// read all orders 
-const getAllOrderDB = async(page, perPage) => {
-    return Order.find()
-    .populate("products users")
-    .skip((page - 1) * perPage)
-    .limit(perPage)
-};
 // read only one order
 const getOrderByIdDB = async(_id) => {
     return Order.findById(_id)
@@ -40,17 +33,11 @@ const ordersDB = async(orderQuery, page, perPage, sortOption) => {
 const countDocumentsDB = async(orderQuery) => {
     return Order.countDocuments(orderQuery)
 };
-// calculate total number of documents
-const countDocuOrderDB = async() => {
-    return Order.countDocuments()
-};
 module.exports = {
-    getAllOrderDB,
     getOrderByIdDB,
     insertOrderDB,
     deleteOrderDB,
     updateOrderDB,
     ordersDB,
     countDocumentsDB,
-    countDocuOrderDB
 }

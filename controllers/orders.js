@@ -1,14 +1,17 @@
 const mongoose= require("mongoose");
 const httpStatus = require ("http-status-codes");
-const {getProductByIdDB} = require("../models/productModel")
+const {
+    getProductByIdDB,
+    productFindDB
+} = require("../models/productModel")
 const {getUserByIdDB} = require("../models/userModel")
 const {
-    getAllOrderDB, 
     getOrderByIdDB,
     insertOrderDB,
     deleteOrderDB,
     updateOrderDB,
-    countDocuOrderDB
+    countDocumentsDB,
+    ordersDB
 } = require ("../models/orderModel")
 // read all orders
 const getAllOrders = async (req, res) => {
@@ -16,11 +19,47 @@ const getAllOrders = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         // number of orders per page
         const perPage = parseInt(req.query.perPage) || 10;
-        // calculate total number of documents and how many pages are needed to include documents based on "perPage"
-        const totalOrders = await countDocuOrderDB();
-        const totalPages = Math.ceil(totalOrders / perPage)
-        const orders = await getAllOrderDB(page, perPage)
-        if (!orders.length) {
+        // filter by date and products
+        const productName = req.query.name;
+        const orderDate = req.query.date ? new Date(req.query.date) : null;
+        let nextDay = null;
+        if (orderDate) {
+            nextDay = new Date(orderDate);
+            nextDay.setDate(orderDate.getDate() + 1);
+        }
+        // results in ascending, descending or by date modified
+        const sortOrder = req.query.sort === "asc" ? 1 : -1
+        const sortField = req.query.sortField || "createdAt";
+        const sortOption = {
+            [sortField]: sortOrder,
+}
+let orderQuery = {};
+let product;
+// if the product is not there, a warning message appears
+if(productName) {
+    product = await productFindDB({name:productName});
+if (!product) {
+   return res.status(httpStatus.NOT_FOUND).json({
+       success: false,
+       message: "Product not found"
+   });
+}
+}
+// check if there is the product and the date or only one of the two
+if (product) {
+    orderQuery.products = product._id;
+}
+if (orderDate) {
+    orderQuery.createdAt ={
+        $gte: orderDate,
+        $lt: nextDay,  
+    };
+}
+// calculate total number of documents and how many pages are needed to include documents based on "perPage"
+const totalOrders = await countDocumentsDB(orderQuery);
+const totalPages = Math.ceil(totalOrders / perPage)
+const orders = await ordersDB(orderQuery, page, perPage, sortOption);
+if (!orders.length) {
             return res.status(httpStatus.NOT_FOUND).json({
                 success: false,
                 message: "Order not found"
