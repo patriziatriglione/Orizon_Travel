@@ -44,7 +44,6 @@ const countDocumentsDB = async(orderQuery) => {
 const countDocuOrderDB = async() => {
     return Order.countDocuments()
 };
-
 module.exports = {
     getAllOrderDB,
     getOrderByIdDB,

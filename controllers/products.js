@@ -19,8 +19,7 @@ const getAllProducts = async (req, res) => {
     const totalProducts = await countDocuProductDB();
     const totalPages = Math.ceil(totalProducts / perPage)
     const products = await getAllProductDB(page,perPage)
-    
-        res.status(httpStatus.OK).json({
+    res.status(httpStatus.OK).json({
             success: true,
             data: products,
             pageInfo: {
