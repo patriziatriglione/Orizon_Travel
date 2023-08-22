@@ -58,6 +58,12 @@ Paste, enter your password instead of __<password>__, enter the port number, and
 |  POST   | api/products      | create a product      |   
 |  PATCH  | api/products/:id  | modify a product      |
 |  DELETE | api/products/:id  | delete a product      |
+#### Filter for Pagination
+| Method  | API                        | Result                                      |
+|---------|----------------------------|---------------------------------------------|
+|  GET    |  api/products?perPage=2    | how many results should be on a page        |   
+|  GET    |  api/products?page=2       | page number                                 |   
+
 
 ### Users
 | Method  | API               | Result                |
@@ -67,6 +73,12 @@ Paste, enter your password instead of __<password>__, enter the port number, and
 |  POST   | api/users         | create a user         |   
 |  PATCH  | api/users/:id     | modify a user         |
 |  DELETE | api/users/:id     | delete a user         |
+#### Filter for Pagination
+| Method  | API                        | Result                                      |
+|---------|----------------------------|---------------------------------------------|
+|  GET    |  api/users?perPage=2       | how many results should be on a page        |   
+|  GET    |  api/users?page=2          | page number                                 | 
+
 
 ### Orders
 | Method  | API               | Result                |
@@ -80,14 +92,17 @@ Paste, enter your password instead of __<password>__, enter the port number, and
 ### Filter Orders
 | Method  | API                                                    | Result                                                        |
 |---------|--------------------------------------------------------|---------------------------------------------------------------|
-|  GET    |  api/orders/search?date=YYYY-MM-GG                     | list of orders on a date                                      |   
-|  GET    |  api/orders/search?name=ProductName                    | list of orders from the name of the searched product          |   
-|  GET    | api/orders/search?limit=2                              | limit for the results to be displayed                         |   
-|  GET    | api/orders/search?sort=asc                             | list of orders from oldest to newest                          |
-|  GET    | api/orders/search?sort=desc                            | list of orders from newest to oldest                          |
-|  GET    | api/orders/search?sort=asc&sortField=updatedAt         | list from oldest to newest of modified orders                 |
-|  GET    | api/orders/search?sort=desc&sortField=updatedAt        | list from  newest to oldest of modified orders                |
-
+|  GET    |  api/orders?date=YYYY-MM-GG                            | list of orders on a date                                      |   
+|  GET    |  api/orders?name=ProductName                           | list of orders from the name of the searched product          |   
+|  GET    | api/orders?sort=asc                                    | list of orders from oldest to newest                          |
+|  GET    | api/orders?sort=desc                                   | list of orders from newest to oldest                          |
+|  GET    | api/orders?sort=asc&sortField=updatedAt                | list from oldest to newest of modified orders                 |
+|  GET    | api/orders?sort=desc&sortField=updatedAt               | list from  newest to oldest of modified orders                |
+#### Filter for Pagination
+| Method  | API                        | Result                                      |
+|---------|----------------------------|---------------------------------------------|
+|  GET    |  api/orders?perPage=2      | how many results should be on a page        |   
+|  GET    |  api/orders?page=2         | page number                                 | 
 
 ## Example
 #### Products
@@ -100,7 +115,7 @@ Paste, enter your password instead of __<password>__, enter the port number, and
 ![example_orders](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/order_example.gif?raw=true)
 
 #### Oders - Filter
-![example_filter](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/filter_example.gif?raw=true)
+![example_filter](https://github.com/patriziatriglione/Orizon_Travel/blob/main/images/filterOrder_example.gif?raw=true)
 
 
 
